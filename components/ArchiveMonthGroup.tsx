@@ -47,7 +47,7 @@ export default function ArchiveMonthGroup({
       className="mb-10 overflow-visible"
     >
       <h2 className="text-2xl font-bold text-gray-100 mb-4">
-        {formatMonthYear(monthKey)}
+        {`${formatMonthYear(monthKey)} ${items.length > 0 ? `(${items.length})` : ""}`}
       </h2>
 
       <HorizontalScroller>
