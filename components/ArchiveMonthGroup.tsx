@@ -51,9 +51,9 @@ export default function ArchiveMonthGroup({
       </h2>
 
       <HorizontalScroller>
-        {items.map((anime) => (
+        {items.map((anime, index) => (
           <motion.button
-            key={`${anime.id}-${anime.title}-${Math.random().toString(36).slice(2, 8)}`}
+            key={`${anime.id}-${index}`}
             variants={itemVariants}
             onClick={() => onAnimeClick(anime)}
             whileHover={{ scale: 1.08 }}
