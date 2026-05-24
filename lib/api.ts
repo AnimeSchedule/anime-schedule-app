@@ -13,6 +13,11 @@ export type AnimeItem = {
   genres?: string;
 };
 
+export type ArchiveItem = AnimeItem & {
+  start_date: string;
+  end_date: string;
+};
+
 export type Day = {
   day: string;
   anime: AnimeItem[];
@@ -23,6 +28,11 @@ export type ScheduleResponse = {
   days: Day[];
 };
 
+export type ArchiveResponse = {
+  success: boolean;
+  archive: ArchiveItem[];
+};
+
 export async function fetchSchedule(): Promise<ScheduleResponse> {
   const res = await fetch(`${process.env.ANIMESCHEDULE_API_URL}/details`, { next: { revalidate: 60 * 5 } });
   if (!res.ok) {
@@ -30,4 +40,13 @@ export async function fetchSchedule(): Promise<ScheduleResponse> {
   }
   const data = await res.json();
   return data as ScheduleResponse;
+}
+
+export async function fetchArchive(): Promise<ArchiveResponse> {
+  const res = await fetch(`${process.env.ANIMESCHEDULE_API_URL}/archive/details`, { next: { revalidate: 60 * 60 } });
+  if (!res.ok) {
+    throw new Error("Failed to fetch archive");
+  }
+  const data = await res.json();
+  return data as ArchiveResponse;
 }

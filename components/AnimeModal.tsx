@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import { AiOutlineClose } from "react-icons/ai";
 import { AnimeItem } from "../lib/api";
+import { formatSource } from "../lib/format";
 import { motion, AnimatePresence } from "framer-motion";
 import useNyaa from "../hooks/useNyaa";
 
@@ -83,7 +84,7 @@ export default function AnimeModal({
       <motion.div
         key="overlay"
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 flex items-center justify-center p-6 sm:p-12 cursor-pointer"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6 sm:p-12 cursor-pointer"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -92,7 +93,7 @@ export default function AnimeModal({
         <motion.div
           key="modal"
           onClick={(e) => e.stopPropagation()}
-          className="w-full sm:max-w-5xl bg-gray-900/40 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-800 p-4 sm:p-8 max-h-[90vh] overflow-auto cursor-default"
+          className="w-full sm:max-w-5xl bg-gray-900/40 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-800 p-4 sm:p-8 max-h-[90vh] overflow-auto cursor-default z-50"
           initial={{ opacity: 0, scale: 0.96, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.96, y: 10 }}
@@ -162,7 +163,7 @@ export default function AnimeModal({
                     )}
                     {initial.source && (
                       <span className="bg-pink-900/30 text-pink-300 px-2 py-0.5 rounded-lg text-sm">
-                        {initial.source}
+                        {formatSource(initial.source)}
                       </span>
                     )}
                   </div>
