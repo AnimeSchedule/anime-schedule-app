@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { AnimeItem } from "../lib/api";
+import { formatSource } from "../lib/format";
 import { AnimatePresence } from "framer-motion";
 import AnimeModal from "./AnimeModal";
 
@@ -59,7 +60,7 @@ export default function AnimeCard({ anime }: { anime: AnimeItem }) {
               )}
               {anime.source && (
                 <span className="bg-pink-900/30 text-pink-300 px-2 py-1 rounded-lg text-sm">
-                  {anime.source}
+                  {formatSource(anime.source)}
                 </span>
               )}
             </div>
