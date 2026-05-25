@@ -33,8 +33,22 @@ export type ArchiveResponse = {
   archive: ArchiveItem[];
 };
 
+function getApiBaseUrl() {
+  const base = process.env.ANIMESCHEDULE_API_URL;
+  if (!base) {
+    console.error("ANIMESCHEDULE_API_URL is not set. Returning empty data.");
+    return null;
+  }
+  return base.replace(/\/$/, "");
+}
+
 export async function fetchSchedule(): Promise<ScheduleResponse> {
-  const res = await fetch(`${process.env.ANIMESCHEDULE_API_URL}/details`, { next: { revalidate: 60 * 5 } });
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl) {
+    return { success: false, days: [] };
+  }
+
+  const res = await fetch(`${apiBaseUrl}/details`, { next: { revalidate: 60 * 5 } });
   if (!res.ok) {
     throw new Error("Failed to fetch schedule");
   }
@@ -43,7 +57,12 @@ export async function fetchSchedule(): Promise<ScheduleResponse> {
 }
 
 export async function fetchArchive(): Promise<ArchiveResponse> {
-  const res = await fetch(`${process.env.ANIMESCHEDULE_API_URL}/archive/details`, { next: { revalidate: 60 * 60 } });
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl) {
+    return { success: false, archive: [] };
+  }
+
+  const res = await fetch(`${apiBaseUrl}/archive/details`, { cache: "no-store" });
   if (!res.ok) {
     throw new Error("Failed to fetch archive");
   }

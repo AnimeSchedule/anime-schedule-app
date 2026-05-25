@@ -21,6 +21,18 @@ export default function CustomDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const handleToggle = () => setIsOpen((prev) => !prev);
+
+  const handleTriggerKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleToggle();
+    }
+    if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -42,12 +54,16 @@ export default function CustomDropdown({
   return (
     <div className="relative w-full sm:w-auto" ref={dropdownRef}>
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-2 rounded-lg bg-gray-800/40 border border-gray-700 text-gray-100 text-left flex items-center justify-between hover:border-gray-600 focus:outline-none focus:border-indigo-500 transition-colors duration-200"
+        type="button"
+        onClick={handleToggle}
+        onKeyDown={handleTriggerKeyDown}
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        className="w-full px-4 py-2.5 rounded-xl bg-slate-900/60 border border-slate-600/40 text-gray-100 text-left flex items-center justify-between hover:border-orange-200/35 focus:outline-none focus:border-orange-300/55 focus-visible:ring-2 focus-visible:ring-orange-300/60 transition-colors duration-200"
       >
         <span className="text-sm sm:text-base">{selectedLabel}</span>
         <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-          <FaChevronDown size={14} className="text-gray-400" />
+          <FaChevronDown size={14} className="text-orange-100/80" />
         </motion.div>
       </button>
 
@@ -58,18 +74,21 @@ export default function CustomDropdown({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full left-0 right-0 mt-2 z-50 bg-gray-800 border border-gray-700 rounded-lg shadow-xl overflow-hidden"
+            className="absolute top-full left-0 right-0 mt-2 z-50 bg-slate-950/95 border border-slate-600/45 rounded-xl shadow-2xl overflow-hidden backdrop-blur-md"
+            role="listbox"
+            aria-label={label}
           >
             <div className="max-h-64 overflow-y-auto">
               {value && onClear && (
                 <motion.button
+                  type="button"
                   initial={{ opacity: 0.7 }}
-                  whileHover={{ backgroundColor: "rgba(79, 70, 229, 0.1)" }}
+                  whileHover={{ backgroundColor: "rgba(255, 154, 74, 0.14)" }}
                   onClick={() => {
                     onClear();
                     setIsOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-indigo-400 hover:text-indigo-300 font-medium border-b border-gray-700 transition-colors"
+                  className="w-full px-4 py-2 text-left text-sm text-orange-200 hover:text-orange-100 font-medium border-b border-slate-600/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60"
                 >
                   Clear {label}
                 </motion.button>
@@ -77,25 +96,28 @@ export default function CustomDropdown({
 
               {options.map((option) => (
                 <motion.button
+                  type="button"
                   key={option}
                   initial={{ opacity: 0.8 }}
-                  whileHover={{ backgroundColor: "rgba(79, 70, 229, 0.15)" }}
+                  whileHover={{ backgroundColor: "rgba(255, 154, 74, 0.12)" }}
                   onClick={() => {
                     onChange(option);
                     setIsOpen(false);
                   }}
+                  role="option"
+                  aria-selected={value === option}
                   className={`w-full px-4 py-2 text-left text-sm transition-colors ${
                     value === option
-                      ? "bg-indigo-600/20 text-indigo-300 font-medium"
+                        ? "bg-orange-300/20 text-orange-100 font-medium"
                       : "text-gray-300 hover:text-gray-100"
-                  }`}
+                      } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60`}
                 >
                   {option}
                 </motion.button>
               ))}
 
               {options.length === 0 && (
-                <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                <div className="px-4 py-3 text-sm text-[color:var(--text-muted)] text-center">
                   No options available
                 </div>
               )}

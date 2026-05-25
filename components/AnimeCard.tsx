@@ -1,21 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { AnimeItem } from "../lib/api";
 import { formatSource } from "../lib/format";
-import { AnimatePresence } from "framer-motion";
-import AnimeModal from "./AnimeModal";
 
 export default function AnimeCard({ anime }: { anime: AnimeItem }) {
-  const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <>
-      <div
-        onClick={() => setOpen(true)}
-        className="flex flex-col sm:flex-row my-4 items-start gap-4 p-4 rounded-2xl backdrop-blur-md bg-gray-900/40 border border-gray-800 shadow-lg cursor-pointer transition-transform duration-300 hover:scale-105 hover:shadow-2xl"
+      <button
+        type="button"
+        onClick={() => router.push(`/anime/${anime.id}?from=home`)}
+        className="w-full text-left flex gap-3 sm:gap-4 my-3 sm:my-4 items-start p-3 sm:p-4 rounded-2xl backdrop-blur-md bg-[color:var(--surface-0)] border border-[color:var(--surface-border)] shadow-[0_10px_30px_rgba(5,10,24,0.35)] cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300/35 hover:shadow-[0_20px_36px_rgba(7,14,30,0.48)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60"
       >
         {/* Poster */}
-        <div className="relative w-full sm:w-32 md:w-36 lg:w-44 aspect-2/3 rounded-xl overflow-hidden shrink-0 border border-gray-700/50">
+        <div className="relative w-24 sm:w-32 md:w-36 lg:w-44 aspect-2/3 rounded-xl overflow-hidden shrink-0 border border-gray-700/50">
           {anime.poster_url ? (
             <img
               src={anime.poster_url}
@@ -30,55 +29,61 @@ export default function AnimeCard({ anime }: { anime: AnimeItem }) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 flex flex-col justify-between p-2">
+        <div className="flex-1 flex flex-col justify-between p-0 sm:p-2 min-w-0">
           <div>
-            <h3 className="text-xl font-bold text-gray-100">
+            <h3 className="text-base sm:text-xl font-bold text-gray-100 line-clamp-2 tracking-tight">
               {anime.title_english || anime.title}
             </h3>
 
             {anime.synopsis && (
-              <p className="text-sm text-gray-300 mt-2 line-clamp-3">
+              <p className="text-xs sm:text-sm text-gray-300/90 mt-1.5 sm:mt-2 line-clamp-2 sm:line-clamp-3 leading-relaxed">
                 {anime.synopsis}
               </p>
             )}
 
-            <div className="flex flex-wrap gap-2 mt-3">
-              {anime.score && (
-                <span className="text-yellow-300 font-semibold bg-yellow-900/30 px-2 py-1 rounded-lg text-sm flex items-center gap-1">
-                  ⭐ {anime.score}
+            <div className="mt-2 sm:mt-3 space-y-1.5">
+              <div className="flex flex-wrap items-center gap-1.5 text-[11px] sm:text-xs">
+                <span className="inline-flex items-center gap-1 rounded-md border border-amber-300/30 bg-amber-400/14 px-2 py-0.5 text-amber-200 font-semibold">
+                  ⭐ {anime.score ?? "N/A"}
                 </span>
-              )}
-              {anime.genres && (
-                <span className="bg-indigo-900/30 text-indigo-300 px-2 py-1 rounded-lg text-sm">
-                  {anime.genres}
+
+                <span className="inline-flex items-center gap-1 rounded-md border border-emerald-300/25 bg-emerald-400/12 px-2 py-0.5 text-emerald-100 max-w-full">
+                  <span className="text-emerald-200/80 font-semibold">Studio:</span>
+                  <span className="line-clamp-1">{anime.studios || "Unknown"}</span>
                 </span>
-              )}
-              {anime.studios && (
-                <span className="bg-green-900/30 text-green-300 px-2 py-1 rounded-lg text-sm">
-                  {anime.studios}
+
+                <span className="inline-flex items-center gap-1 rounded-md border border-orange-300/25 bg-orange-400/12 px-2 py-0.5 text-orange-100 max-w-full">
+                  <span className="text-orange-200/80 font-semibold">Source:</span>
+                  <span className="line-clamp-1">{anime.source ? formatSource(anime.source) : "Unknown"}</span>
                 </span>
-              )}
-              {anime.source && (
-                <span className="bg-pink-900/30 text-pink-300 px-2 py-1 rounded-lg text-sm">
-                  {formatSource(anime.source)}
-                </span>
-              )}
+              </div>
+
+              <div className="flex flex-wrap gap-1.5">
+                {(anime.genres ? anime.genres.split(", ") : ["Unknown"]).map((genre) => (
+                  <span
+                    key={genre}
+                    className="bg-teal-300/12 text-teal-100 border border-teal-200/20 px-2 py-0.5 rounded-md text-[10px] sm:text-xs"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
             </div>
 
             {anime.status && (
               <div className="mt-3 space-y-1">
                 {anime.status.total ? (
                   <>
-                    <div className="flex justify-between text-sm text-gray-400">
+                    <div className="flex justify-between text-xs sm:text-sm text-[color:var(--text-muted)]">
                       <span>Aired</span>
                       <span>
                         {anime.status.aired} / {anime.status.total}
                       </span>
                     </div>
 
-                    <div className="relative w-full h-[3px] bg-gray-700 rounded-full">
+                    <div className="relative w-full h-[3px] bg-slate-700/80 rounded-full">
                       <div
-                        className="absolute inset-y-0 left-0 bg-indigo-400 rounded-full transition-[width] duration-500"
+                        className="absolute inset-y-0 left-0 bg-orange-300 rounded-full transition-[width] duration-500"
                         style={{
                           width: `${(anime.status.aired / anime.status.total) * 100}%`,
                         }}
@@ -87,13 +92,13 @@ export default function AnimeCard({ anime }: { anime: AnimeItem }) {
                   </>
                 ) : (
                   <>
-                    <div className="flex justify-between text-sm text-gray-400">
+                    <div className="flex justify-between text-xs sm:text-sm text-[color:var(--text-muted)]">
                       <span>Airing</span>
                       <span>Episode {anime.status.aired}</span>
                     </div>
 
-                    <div className="relative w-full h-[3px] bg-gray-700/50 rounded-full overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-400/70 via-indigo-200/40 to-indigo-400/70 animate-[pulse_2.2s_ease-in-out_infinite]" />
+                    <div className="relative w-full h-[3px] bg-slate-700/50 rounded-full overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-300/70 via-amber-100/40 to-orange-300/70 animate-[pulse_2.2s_ease-in-out_infinite]" />
                     </div>
                   </>
                 )}
@@ -106,17 +111,12 @@ export default function AnimeCard({ anime }: { anime: AnimeItem }) {
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="mt-4 self-start px-3 py-1.5 text-sm font-medium text-indigo-300 bg-indigo-900/20 rounded-md hover:bg-indigo-900/40 transition-colors"
+            className="mt-3 sm:mt-4 self-start px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-orange-100 bg-orange-400/12 border border-orange-300/25 rounded-md hover:bg-orange-300/20 transition-colors"
           >
             View on MAL
           </a>
         </div>
-      </div>
-
-      {/* Modal */}
-      <AnimatePresence>
-        {open && <AnimeModal initial={anime} onClose={() => setOpen(false)} />}
-      </AnimatePresence>
+      </button>
     </>
   );
 }

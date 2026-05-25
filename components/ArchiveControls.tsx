@@ -29,16 +29,16 @@ export default function ArchiveControls({
   resultCount: number;
 }) {
   return (
-    <div className="mb-8 space-y-4">
+    <div className="mb-8 space-y-4 surface-panel rounded-2xl p-4 sm:p-5">
       {/* Search Bar - Full width */}
       <div className="relative w-full">
-        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-200/70 pointer-events-none" />
         <input
           type="text"
           placeholder="Search by title..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 rounded-lg bg-gray-800/40 border border-gray-700 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+          className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-900/60 border border-slate-600/40 text-gray-100 placeholder-slate-400 focus:outline-none focus:border-orange-300/55 focus-visible:ring-2 focus-visible:ring-orange-300/60 transition-colors"
         />
       </div>
 
@@ -73,31 +73,35 @@ export default function ArchiveControls({
 
         {/* View Toggle and Results */}
         <div className="flex items-center gap-3 justify-between sm:justify-start">
-          <span className="text-sm text-gray-400 whitespace-nowrap">
+          <span className="text-sm text-[color:var(--text-muted)] whitespace-nowrap">
             {resultCount} result{resultCount !== 1 ? "s" : ""}
           </span>
-          <div className="flex gap-2 bg-gray-800/40 p-1 rounded-lg border border-gray-700">
+          <div className="flex gap-2 bg-slate-900/60 p-1 rounded-xl border border-slate-600/40">
             <button
+              type="button"
               onClick={() => onViewModeChange("grid")}
               className={classNames(
-                "p-2 rounded transition-colors",
+                "p-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60",
                 viewMode === "grid"
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:text-gray-200"
+                  ? "bg-orange-300/20 text-orange-100"
+                  : "text-[color:var(--text-muted)] hover:text-gray-100"
               )}
               title="Grid view"
+              aria-label="Switch to grid view"
             >
               <FaThLarge size={18} />
             </button>
             <button
+              type="button"
               onClick={() => onViewModeChange("list")}
               className={classNames(
-                "p-2 rounded transition-colors",
+                "p-2 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60",
                 viewMode === "list"
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-400 hover:text-gray-200"
+                  ? "bg-orange-300/20 text-orange-100"
+                  : "text-[color:var(--text-muted)] hover:text-gray-100"
               )}
               title="List view"
+              aria-label="Switch to list view"
             >
               <FaList size={18} />
             </button>

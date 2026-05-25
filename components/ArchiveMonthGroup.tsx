@@ -42,11 +42,11 @@ export default function ArchiveMonthGroup({
   return (
     <motion.div
       variants={containerVariants}
-      initial="hidden"
+      initial={false}
       animate="visible"
       className="mb-10 overflow-visible"
     >
-      <h2 className="text-2xl font-bold text-gray-100 mb-4">
+      <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
         {`${formatMonthYear(monthKey)} ${items.length > 0 ? `(${items.length})` : ""}`}
       </h2>
 
@@ -58,7 +58,7 @@ export default function ArchiveMonthGroup({
             onClick={() => onAnimeClick(anime)}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.96 }}
-            className="relative z-10 group shrink-0 w-40 sm:w-44 md:w-48 lg:w-56 snap-center aspect-2/3 rounded-lg overflow-hidden border border-gray-700/50 shadow-lg cursor-pointer transition-shadow duration-300 hover:shadow-2xl lg:hover:z-40"
+            className="relative z-10 group shrink-0 w-40 sm:w-44 md:w-48 lg:w-56 snap-center aspect-2/3 rounded-xl overflow-hidden border border-slate-600/45 shadow-lg cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-orange-200/35 hover:shadow-[0_18px_32px_rgba(5,12,26,0.45)] lg:hover:z-40"
           >
             {/* Poster Image */}
             {anime.poster_url ? (
@@ -68,7 +68,7 @@ export default function ArchiveMonthGroup({
                 className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-gray-500 font-semibold tracking-wide bg-gray-800">
+              <div className="absolute inset-0 flex items-center justify-center text-[color:var(--text-muted)] font-semibold tracking-wide bg-slate-900">
                 NO POSTER
               </div>
             )}
@@ -79,7 +79,7 @@ export default function ArchiveMonthGroup({
                 {anime.title_english || anime.title}
               </p>
               {anime.score && (
-                <p className="text-yellow-300 text-xs mt-1 flex items-center gap-1">
+                <p className="text-amber-200 text-xs mt-1 flex items-center gap-1">
                   ⭐ {anime.score}
                 </p>
               )}

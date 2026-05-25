@@ -1,18 +1,33 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { ArchiveItem } from "../lib/api";
 import ArchiveControls from "./ArchiveControls";
 import ArchiveMonthGroup from "./ArchiveMonthGroup";
 import ArchiveListView from "./ArchiveListView";
-import AnimeModal from "./AnimeModal";
-import { AnimatePresence } from "framer-motion";
 
 export default function ArchiveContent({ archive }: { archive: ArchiveItem[] }) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [selectedStudio, setSelectedStudio] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedAnime, setSelectedAnime] = useState<ArchiveItem | null>(null);
+
+  const onAnimeClick = useCallback(
+    (anime: ArchiveItem) => {
+      router.push(`/anime/${anime.id}?from=archive`);
+    },
+    [router]
+  );
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm.trim());
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
 
   // Extract unique genres and studios
   const allGenres = useMemo(() => {
@@ -39,8 +54,8 @@ export default function ArchiveContent({ archive }: { archive: ArchiveItem[] }) 
   const filteredArchive = useMemo(() => {
     return archive.filter((item) => {
       // Search filter
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
+      if (debouncedSearchTerm) {
+        const term = debouncedSearchTerm.toLowerCase();
         const titleMatch = item.title.toLowerCase().includes(term);
         const titleEnMatch = item.title_english?.toLowerCase().includes(term);
         if (!titleMatch && !titleEnMatch) return false;
@@ -48,17 +63,19 @@ export default function ArchiveContent({ archive }: { archive: ArchiveItem[] }) 
 
       // Genre filter
       if (selectedGenre) {
-        if (!item.genres?.includes(selectedGenre)) return false;
+        const genres = item.genres?.split(",").map((g) => g.trim()) ?? [];
+        if (!genres.includes(selectedGenre)) return false;
       }
 
       // Studio filter
       if (selectedStudio) {
-        if (!item.studios?.includes(selectedStudio)) return false;
+        const studios = item.studios?.split(",").map((s) => s.trim()) ?? [];
+        if (!studios.includes(selectedStudio)) return false;
       }
 
       return true;
     });
-  }, [archive, searchTerm, selectedGenre, selectedStudio]);
+  }, [archive, debouncedSearchTerm, selectedGenre, selectedStudio]);
 
   // Group by month and sort
   const groupedByMonth = useMemo(() => {
@@ -117,7 +134,7 @@ export default function ArchiveContent({ archive }: { archive: ArchiveItem[] }) 
               key={monthKey}
               monthKey={monthKey}
               items={items}
-              onAnimeClick={setSelectedAnime}
+              onAnimeClick={onAnimeClick}
             />
           ))}
         </div>
@@ -125,18 +142,9 @@ export default function ArchiveContent({ archive }: { archive: ArchiveItem[] }) 
         <ArchiveListView
           items={filteredArchive}
           groupedByMonth={groupedByMonth}
-          onAnimeClick={setSelectedAnime}
+          onAnimeClick={onAnimeClick}
         />
       )}
-
-      <AnimatePresence>
-        {selectedAnime && (
-          <AnimeModal
-            initial={selectedAnime}
-            onClose={() => setSelectedAnime(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
