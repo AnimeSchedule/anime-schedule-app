@@ -23,7 +23,8 @@ export default function useNyaa(q: string, keySuffix?: number) {
   const swrKey = q + (keySuffix ? `:${keySuffix}` : "");
   const { data, error, isLoading } = useSWR(swrKey, () => fetcher(q), {
     revalidateOnFocus: false,
-    shouldRetryOnError: false
+    shouldRetryOnError: false,
+    keepPreviousData: true,
   });
 
   return { data, loading: isLoading, error };

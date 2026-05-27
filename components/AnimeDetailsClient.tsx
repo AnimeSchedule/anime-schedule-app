@@ -9,7 +9,6 @@ import {
   FaBox,
   FaDownload,
   FaExternalLinkAlt,
-  FaFilm,
   FaMagnet,
   FaRegCalendarAlt,
 } from "react-icons/fa";
@@ -19,6 +18,17 @@ import useNyaa from "../hooks/useNyaa";
 
 function cleanSearchTerm(term: string) {
   return term.replace(/['":]/g, "");
+}
+
+function simplifyTitle(title: string): string {
+  return title
+    .replace(/\s*Part\s*\d+.*/i, '')
+    .replace(/\s*Season\s*\d+.*/i, '')
+    .replace(/\s*\d+(?:st|nd|rd|th)\s+Season.*/i, '')
+    .replace(/\s*Cour\s*\d+.*/i, '')
+    .replace(/\s*[:：]\s*.+$/, '')
+    .replace(/\s+(?:II|III|IV|V|VI|VII|VIII|IX|X)$/i, '')
+    .trim();
 }
 
 const SEARCH_PROFILES = [
@@ -44,6 +54,22 @@ const SEARCH_PROFILES = [
       const t = cleanSearchTerm(title);
       const te = titleEn ? cleanSearchTerm(titleEn) : undefined;
       return te ? `Dub 1080p ("${t}"|"${te}")` : `Dub 1080p ${t}`;
+    },
+  },
+  {
+    label: "Dub (broad)",
+    pattern: (title: string, titleEn?: string | null) => {
+      const t = simplifyTitle(cleanSearchTerm(title)) || cleanSearchTerm(title);
+      const te = titleEn ? simplifyTitle(cleanSearchTerm(titleEn)) || cleanSearchTerm(titleEn) : undefined;
+      return `Dub 1080p ${te || t}`;
+    },
+  },
+  {
+    label: "Dual Audio (broad)",
+    pattern: (title: string, titleEn?: string | null) => {
+      const t = simplifyTitle(cleanSearchTerm(title)) || cleanSearchTerm(title);
+      const te = titleEn ? simplifyTitle(cleanSearchTerm(titleEn)) || cleanSearchTerm(titleEn) : undefined;
+      return `Dual Audio 1080p ${te || t}`;
     },
   },
 ];
@@ -123,7 +149,7 @@ export default function AnimeDetailsClient({
   }, [handleBack]);
 
   return (
-    <div className="w-full max-w-6xl rounded-2xl sm:rounded-3xl border border-[color:var(--surface-border)] bg-[color:var(--surface-0)] backdrop-blur-md p-4 sm:p-6 lg:p-8 shadow-[0_24px_48px_rgba(6,12,24,0.42)]">
+    <div className="w-full max-w-6xl rounded-2xl sm:rounded-3xl border border-[color:var(--surface-border)] bg-[color:var(--surface-0)] p-4 sm:p-6 lg:p-8 shadow-[0_24px_48px_rgba(6,12,24,0.42)]">
       <div className="flex items-center justify-between gap-3">
         <button
           type="button"
@@ -153,7 +179,7 @@ export default function AnimeDetailsClient({
             {anime.title_english || anime.title}
           </h1>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="rounded-xl border border-slate-600/35 bg-slate-900/40 px-3 py-2.5">
               <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-muted)] font-semibold">Rating</p>
               <p className="mt-1 text-sm sm:text-base text-amber-200 font-semibold">
@@ -168,26 +194,23 @@ export default function AnimeDetailsClient({
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-600/35 bg-slate-900/40 px-3 py-2.5 sm:col-span-2">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-muted)] font-semibold">Genres</p>
-              <div className="mt-1.5 flex flex-wrap gap-1.5">
-                {(anime.genres ? anime.genres.split(", ") : ["Unknown"]).map((genre) => (
-                  <span
-                    key={genre}
-                    className="bg-teal-300/12 text-teal-100 border border-teal-200/20 px-2 py-0.5 rounded-lg text-xs sm:text-sm"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-slate-600/35 bg-slate-900/40 px-3 py-2.5 sm:col-span-2">
+            <div className="rounded-xl border border-slate-600/35 bg-slate-900/40 px-3 py-2.5">
               <p className="text-[11px] uppercase tracking-[0.14em] text-[color:var(--text-muted)] font-semibold">Source</p>
               <p className="mt-1 text-sm sm:text-base text-orange-100 font-medium">
                 {anime.source ? formatSource(anime.source) : "Unknown"}
               </p>
             </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {(anime.genres ? anime.genres.split(", ") : ["Unknown"]).map((genre) => (
+              <span
+                key={genre}
+                className="bg-teal-300/12 text-teal-100 border border-teal-200/20 px-2 py-0.5 rounded-lg text-xs sm:text-sm"
+              >
+                {genre}
+              </span>
+            ))}
           </div>
 
           {anime.url && (
@@ -197,7 +220,7 @@ export default function AnimeDetailsClient({
               rel="noreferrer"
               className="mt-4 inline-flex items-center gap-2 rounded-xl bg-orange-400/18 border border-orange-300/35 px-4 py-2 text-sm font-semibold text-orange-50 hover:bg-orange-300/26 hover:border-orange-200/70 transition-colors"
             >
-              <span>View on MyAnimeList</span>
+              <span>View on MAL</span>
               <FaExternalLinkAlt size={12} />
             </a>
           )}
@@ -245,8 +268,8 @@ export default function AnimeDetailsClient({
         </div>
 
         {loading && (
-          <div className="flex flex-col items-center gap-2 py-10">
-            <div className="w-8 h-8 border-4 border-orange-300 border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col items-center gap-2 py-10" role="status" aria-live="polite">
+            <div className="w-8 h-8 border-4 border-orange-300 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
             <p className="text-sm text-gray-400">Searching torrents...</p>
           </div>
         )}
@@ -282,50 +305,47 @@ export default function AnimeDetailsClient({
             {nyaaData?.torrents?.map((t) => (
               <li
                 key={t.id}
-                className="rounded-2xl border border-slate-600/35 bg-slate-900/55 p-3 sm:p-4 hover:border-cyan-300/30 hover:shadow-[0_14px_26px_rgba(6,12,24,0.44)] transition"
+                className="rounded-2xl border border-[color:var(--surface-border)] bg-[color:var(--surface-0)] p-3 sm:p-4 hover:border-orange-300/25 transition-colors"
               >
                 <a
                   href={t.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm sm:text-base font-semibold text-gray-100 hover:text-orange-200 transition line-clamp-2"
+                  className="text-sm sm:text-base font-semibold text-gray-100 hover:text-orange-200 transition-colors line-clamp-2"
                 >
                   {t.name}
                 </a>
 
-                <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                  <span className="flex items-center gap-1 bg-teal-300/12 text-teal-100 border border-teal-200/20 px-2 py-0.5 rounded-lg">
-                    <FaFilm /> {t.category}
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs text-[color:var(--text-muted)]">
+                  <span className="flex items-center gap-1">
+                    <FaBox size={10} /> {t.size}
                   </span>
-                  <span className="flex items-center gap-1 bg-slate-700/45 text-gray-200 px-2 py-0.5 rounded-lg">
-                    <FaBox /> {t.size}
+                  <span className="flex items-center gap-1 text-emerald-300/80">
+                    <FaArrowUp size={10} /> {t.seeders}
                   </span>
-                  <span className="flex items-center gap-1 bg-emerald-400/12 text-emerald-100 border border-emerald-200/20 px-2 py-0.5 rounded-lg">
-                    <FaArrowUp /> {t.seeders}
+                  <span className="flex items-center gap-1 text-rose-300/70">
+                    <FaArrowDown size={10} /> {t.leechers}
                   </span>
-                  <span className="flex items-center gap-1 bg-rose-400/12 text-rose-100 border border-rose-200/20 px-2 py-0.5 rounded-lg">
-                    <FaArrowDown /> {t.leechers}
+                  <span className="flex items-center gap-1">
+                    <FaDownload size={10} /> {t.downloads}
                   </span>
-                  <span className="flex items-center gap-1 bg-slate-700/45 text-gray-200 px-2 py-0.5 rounded-lg">
-                    <FaDownload /> {t.downloads}
-                  </span>
-                  <span className="flex items-center gap-1 bg-slate-700/45 text-slate-300 px-2 py-0.5 rounded-lg">
-                    <FaRegCalendarAlt /> {t.date}
+                  <span className="flex items-center gap-1">
+                    <FaRegCalendarAlt size={10} /> {t.date}
                   </span>
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <a
                     href={t.magnet}
-                    className="inline-flex items-center gap-1 rounded-xl bg-orange-400/12 border border-orange-300/25 px-3 py-1 text-xs sm:text-sm font-semibold text-orange-100 hover:bg-orange-300/20 transition"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-orange-400/12 border border-orange-300/25 px-3 py-1.5 text-xs font-medium text-orange-100 hover:bg-orange-300/20 transition-colors"
                   >
-                    <FaMagnet /> Magnet
+                    <FaMagnet size={11} /> Magnet
                   </a>
                   <a
                     href={t.downloadUrl}
-                    className="inline-flex items-center gap-1 rounded-xl bg-slate-700/45 border border-slate-500/35 px-3 py-1 text-xs sm:text-sm font-semibold text-gray-100 hover:bg-slate-600/55 transition"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[color:var(--surface-1)] border border-[color:var(--surface-border)] px-3 py-1.5 text-xs font-medium text-gray-200 hover:text-gray-100 transition-colors"
                   >
-                    <FaDownload /> Download
+                    <FaDownload size={11} /> .torrent
                   </a>
                 </div>
               </li>

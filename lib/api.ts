@@ -50,7 +50,7 @@ export async function fetchSchedule(): Promise<ScheduleResponse> {
 
   const res = await fetch(`${apiBaseUrl}/details`, { next: { revalidate: 60 * 5 } });
   if (!res.ok) {
-    throw new Error("Failed to fetch schedule");
+    throw new Error(`Failed to fetch schedule (HTTP ${res.status})`);
   }
   const data = await res.json();
   return data as ScheduleResponse;
@@ -62,9 +62,9 @@ export async function fetchArchive(): Promise<ArchiveResponse> {
     return { success: false, archive: [] };
   }
 
-  const res = await fetch(`${apiBaseUrl}/archive/details`, { cache: "no-store" });
+  const res = await fetch(`${apiBaseUrl}/archive/details`, { next: { revalidate: 60 * 30 } });
   if (!res.ok) {
-    throw new Error("Failed to fetch archive");
+    throw new Error(`Failed to fetch archive (HTTP ${res.status})`);
   }
   const data = await res.json();
   return data as ArchiveResponse;

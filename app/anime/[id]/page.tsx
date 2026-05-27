@@ -1,6 +1,45 @@
 import { notFound } from "next/navigation";
 import AnimeDetailsClient from "../../../components/AnimeDetailsClient";
 import { fetchArchive, fetchSchedule } from "../../../lib/api";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const animeId = Number(resolvedParams.id);
+
+  if (!Number.isInteger(animeId) || animeId <= 0) {
+    return { title: "Not Found — Anime Schedule" };
+  }
+
+  const scheduleResponse = await fetchSchedule();
+  let anime = scheduleResponse.days
+    .flatMap((day) => day.anime)
+    .find((a) => a.id === animeId);
+
+  if (!anime) {
+    const archiveResponse = await fetchArchive();
+    anime = archiveResponse.archive.find((a) => a.id === animeId);
+  }
+
+  if (!anime) {
+    return { title: "Not Found — Anime Schedule" };
+  }
+
+  const title = anime.title_english || anime.title;
+  return {
+    title: `${title} — Anime Schedule`,
+    description: anime.synopsis?.slice(0, 160) || `Details for ${title}`,
+    openGraph: {
+      title,
+      description: anime.synopsis?.slice(0, 160) || `Details for ${title}`,
+      ...(anime.poster_url ? { images: [{ url: anime.poster_url }] } : {}),
+    },
+  };
+}
 
 export default async function AnimeDetailsPage({
   params,
@@ -17,18 +56,16 @@ export default async function AnimeDetailsPage({
     notFound();
   }
 
-  const [scheduleResponse, archiveResponse] = await Promise.all([
-    fetchSchedule(),
-    fetchArchive(),
-  ]);
-
-  const fromSchedule = scheduleResponse.days
+  // Try schedule first (cached/fast via ISR), only fetch archive if not found
+  const scheduleResponse = await fetchSchedule();
+  let anime = scheduleResponse.days
     .flatMap((day) => day.anime)
-    .find((anime) => anime.id === animeId);
+    .find((a) => a.id === animeId);
 
-  const fromArchive = archiveResponse.archive.find((anime) => anime.id === animeId);
-
-  const anime = fromSchedule || fromArchive;
+  if (!anime) {
+    const archiveResponse = await fetchArchive();
+    anime = archiveResponse.archive.find((a) => a.id === animeId);
+  }
 
   if (!anime) {
     notFound();

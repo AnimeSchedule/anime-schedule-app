@@ -1,24 +1,25 @@
 "use client";
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { ArchiveItem } from "../lib/api";
 import ArchiveControls from "./ArchiveControls";
 import ArchiveMonthGroup from "./ArchiveMonthGroup";
 import ArchiveListView from "./ArchiveListView";
+import AnimeModal from "./AnimeModal";
+import { FaSearch } from "react-icons/fa";
 
 export default function ArchiveContent({ archive }: { archive: ArchiveItem[] }) {
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [selectedStudio, setSelectedStudio] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedAnime, setSelectedAnime] = useState<ArchiveItem | null>(null);
 
   const onAnimeClick = useCallback(
     (anime: ArchiveItem) => {
-      router.push(`/anime/${anime.id}?from=archive`);
+      setSelectedAnime(anime);
     },
-    [router]
+    []
   );
 
   useEffect(() => {
@@ -124,8 +125,14 @@ export default function ArchiveContent({ archive }: { archive: ArchiveItem[] }) 
       />
 
       {filteredArchive.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-gray-400 text-lg">No anime found matching your filters.</p>
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-16 h-16 rounded-full bg-[color:var(--surface-0)] border border-[color:var(--surface-border)] flex items-center justify-center mb-4">
+            <FaSearch size={24} className="text-[color:var(--text-muted)]" />
+          </div>
+          <p className="text-gray-300 text-lg font-medium">No results found</p>
+          <p className="text-[color:var(--text-muted)] text-sm mt-2 max-w-md">
+            Try adjusting your search or filters to find what you&apos;re looking for.
+          </p>
         </div>
       ) : viewMode === "grid" ? (
         <div className="space-y-12">
@@ -143,6 +150,13 @@ export default function ArchiveContent({ archive }: { archive: ArchiveItem[] }) 
           items={filteredArchive}
           groupedByMonth={groupedByMonth}
           onAnimeClick={onAnimeClick}
+        />
+      )}
+
+      {selectedAnime && (
+        <AnimeModal
+          initial={selectedAnime}
+          onClose={() => setSelectedAnime(null)}
         />
       )}
     </div>

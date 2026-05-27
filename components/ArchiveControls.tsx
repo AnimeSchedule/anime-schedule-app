@@ -1,5 +1,5 @@
 "use client";
-import { FaSearch, FaThLarge, FaList } from "react-icons/fa";
+import { FaSearch, FaThLarge, FaList, FaTimes } from "react-icons/fa";
 import classNames from "classnames";
 import CustomDropdown from "./CustomDropdown";
 
@@ -29,17 +29,29 @@ export default function ArchiveControls({
   resultCount: number;
 }) {
   return (
-    <div className="mb-8 space-y-4 surface-panel rounded-2xl p-4 sm:p-5">
+    <div className="mb-8 space-y-4 surface-panel rounded-2xl p-4 sm:p-5 sticky top-12 z-30 before:content-[''] before:absolute before:-top-1 before:left-0 before:right-0 before:h-1 before:bg-[color:var(--bg-0)] before:pointer-events-auto">
       {/* Search Bar - Full width */}
       <div className="relative w-full">
         <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-orange-200/70 pointer-events-none" />
         <input
           type="text"
           placeholder="Search by title..."
+          aria-label="Search anime by title"
+          inputMode="search"
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 rounded-xl bg-slate-900/60 border border-slate-600/40 text-gray-100 placeholder-slate-400 focus:outline-none focus:border-orange-300/55 focus-visible:ring-2 focus-visible:ring-orange-300/60 transition-colors"
+          className="w-full pl-12 pr-10 py-3 rounded-xl bg-slate-900/60 border border-slate-600/40 text-gray-100 placeholder-slate-400 focus:outline-none focus:border-orange-300/55 focus-visible:ring-2 focus-visible:ring-orange-300/60 transition-colors"
         />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => onSearchChange("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-200 transition-colors rounded-md"
+            aria-label="Clear search"
+          >
+            <FaTimes size={14} />
+          </button>
+        )}
       </div>
 
       {/* Filters and Controls */}
@@ -73,7 +85,7 @@ export default function ArchiveControls({
 
         {/* View Toggle and Results */}
         <div className="flex items-center gap-3 justify-between sm:justify-start">
-          <span className="text-sm text-[color:var(--text-muted)] whitespace-nowrap">
+          <span className="text-sm text-[color:var(--text-muted)] whitespace-nowrap" role="status" aria-live="polite" aria-atomic="true">
             {resultCount} result{resultCount !== 1 ? "s" : ""}
           </span>
           <div className="flex gap-2 bg-slate-900/60 p-1 rounded-xl border border-slate-600/40">

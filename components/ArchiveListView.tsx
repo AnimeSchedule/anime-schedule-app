@@ -1,6 +1,7 @@
 "use client";
 import { ArchiveItem } from "../lib/api";
 import { formatSource } from "../lib/format";
+import { FaRegCalendarAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 function formatMonthYear(monthKey: string): string {
@@ -22,25 +23,34 @@ export default function ArchiveListView({
     <div className="space-y-8">
       {groupedByMonth.map(({ monthKey, items: monthItems }) => (
         <div key={monthKey}>
-          <h2 className="text-2xl font-bold text-gray-100 mb-4 tracking-tight">
-            {formatMonthYear(monthKey)}
-          </h2>
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-100 tracking-tight whitespace-nowrap">
+              {formatMonthYear(monthKey)}
+            </h2>
+            <span className="text-xs text-[color:var(--text-muted)] bg-[color:var(--surface-0)] border border-[color:var(--surface-border)] px-2.5 py-0.5 rounded-full font-medium">
+              {monthItems.length}
+            </span>
+            <div className="flex-1 h-px bg-[color:var(--surface-border)]" aria-hidden="true" />
+          </div>
 
           <div className="space-y-3">
             {monthItems.map((anime, index) => (
               <motion.button
                 key={`${anime.id}-${index}`}
                 onClick={() => onAnimeClick(anime)}
+                aria-label={`View details for ${anime.title_english || anime.title}`}
                 whileHover={{ x: 4 }}
                 className="w-full text-left p-4 rounded-xl bg-[color:var(--surface-0)] border border-[color:var(--surface-border)] hover:border-orange-300/35 transition-all duration-300 cursor-pointer hover:shadow-[0_16px_30px_rgba(7,14,28,0.42)]"
               >
                 <div className="flex flex-col sm:flex-row gap-4 items-start">
                   {/* Poster */}
-                  <div className="w-20 h-28 sm:w-24 sm:h-36 shrink-0 rounded-lg overflow-hidden border border-gray-700/50">
+                  <div className="w-20 aspect-2/3 sm:w-24 shrink-0 rounded-lg overflow-hidden border border-gray-700/50">
                     {anime.poster_url ? (
                       <img
                         src={anime.poster_url}
                         alt={anime.title}
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -52,7 +62,7 @@ export default function ArchiveListView({
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-bold text-gray-100 mb-2">
+                    <h3 className="text-lg font-bold text-gray-100 mb-2 line-clamp-2">
                       {anime.title_english || anime.title}
                     </h3>
 
@@ -92,8 +102,10 @@ export default function ArchiveListView({
                     </div>
 
                     {/* Date Range */}
-                    <p className="text-xs text-[color:var(--text-muted)]">
-                      Aired: {new Date(anime.end_date).toLocaleDateString()} •{" "}
+                    <p className="text-xs text-[color:var(--text-muted)] flex items-center gap-1.5">
+                      <FaRegCalendarAlt size={10} />
+                      {new Date(anime.end_date).toLocaleDateString()}
+                      <span className="text-white/20 mx-0.5">&middot;</span>
                       {anime.num_episodes} episode{anime.num_episodes !== 1 ? "s" : ""}
                     </p>
                   </div>

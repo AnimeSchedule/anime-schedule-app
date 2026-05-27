@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaChevronDown } from "react-icons/fa";
 
@@ -19,16 +19,43 @@ export default function CustomDropdown({
   onClear?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const handleToggle = () => setIsOpen((prev) => !prev);
+  const hasClear = !!(value && onClear);
+  const totalItems = hasClear ? options.length + 1 : options.length;
+
+  const handleToggle = () => {
+    setIsOpen((prev) => {
+      if (!prev) setFocusedIndex(-1);
+      return !prev;
+    });
+  };
+
+  const focusItem = useCallback((index: number) => {
+    setFocusedIndex(index);
+    optionRefs.current[index]?.scrollIntoView({ block: "nearest" });
+  }, []);
 
   const handleTriggerKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleToggle();
-    }
-    if (e.key === "Escape") {
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (!isOpen) {
+        setIsOpen(true);
+        setFocusedIndex(0);
+      } else {
+        focusItem(Math.min(focusedIndex + 1, totalItems - 1));
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (isOpen) {
+        focusItem(Math.max(focusedIndex - 1, 0));
+      }
+    } else if (e.key === "Escape") {
       setIsOpen(false);
     }
   };
@@ -48,6 +75,12 @@ export default function CustomDropdown({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen && focusedIndex >= 0) {
+      optionRefs.current[focusedIndex]?.focus();
+    }
+  }, [isOpen, focusedIndex]);
 
   const selectedLabel = value || placeholder;
 
@@ -78,43 +111,60 @@ export default function CustomDropdown({
             role="listbox"
             aria-label={label}
           >
-            <div className="max-h-64 overflow-y-auto">
+            <div className="max-h-[min(256px,60vh)] overflow-y-auto scrollbar-thin scrollbar-thumb-orange-400/30 scrollbar-track-transparent">
               {value && onClear && (
                 <motion.button
                   type="button"
+                  ref={(el) => { optionRefs.current[0] = el; }}
                   initial={{ opacity: 0.7 }}
                   whileHover={{ backgroundColor: "rgba(255, 154, 74, 0.14)" }}
                   onClick={() => {
                     onClear();
                     setIsOpen(false);
                   }}
-                  className="w-full px-4 py-2 text-left text-sm text-orange-200 hover:text-orange-100 font-medium border-b border-slate-600/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60"
+                  onKeyDown={(e) => {
+                    if (e.key === "ArrowDown") { e.preventDefault(); focusItem(Math.min(0 + 1, totalItems - 1)); }
+                    if (e.key === "ArrowUp") { e.preventDefault(); focusItem(0); }
+                    if (e.key === "Escape") { setIsOpen(false); }
+                  }}
+                  className={`w-full px-4 py-2 text-left text-sm text-orange-200 hover:text-orange-100 font-medium border-b border-slate-600/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60 ${focusedIndex === 0 ? "bg-orange-300/14" : ""}`}
                 >
                   Clear {label}
                 </motion.button>
               )}
 
-              {options.map((option) => (
-                <motion.button
-                  type="button"
-                  key={option}
-                  initial={{ opacity: 0.8 }}
-                  whileHover={{ backgroundColor: "rgba(255, 154, 74, 0.12)" }}
-                  onClick={() => {
-                    onChange(option);
-                    setIsOpen(false);
-                  }}
-                  role="option"
-                  aria-selected={value === option}
-                  className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                    value === option
-                        ? "bg-orange-300/20 text-orange-100 font-medium"
-                      : "text-gray-300 hover:text-gray-100"
-                      } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60`}
-                >
-                  {option}
-                </motion.button>
-              ))}
+              {options.map((option, i) => {
+                const itemIndex = hasClear ? i + 1 : i;
+                return (
+                  <motion.button
+                    type="button"
+                    key={option}
+                    ref={(el) => { optionRefs.current[itemIndex] = el; }}
+                    initial={{ opacity: 0.8 }}
+                    whileHover={{ backgroundColor: "rgba(255, 154, 74, 0.12)" }}
+                    onClick={() => {
+                      onChange(option);
+                      setIsOpen(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowDown") { e.preventDefault(); focusItem(Math.min(itemIndex + 1, totalItems - 1)); }
+                      if (e.key === "ArrowUp") { e.preventDefault(); focusItem(Math.max(itemIndex - 1, 0)); }
+                      if (e.key === "Escape") { setIsOpen(false); }
+                    }}
+                    role="option"
+                    aria-selected={value === option}
+                    className={`w-full px-4 py-2 text-left text-sm transition-colors ${
+                      value === option
+                          ? "bg-orange-300/20 text-orange-100 font-medium"
+                        : focusedIndex === itemIndex
+                          ? "bg-orange-300/10 text-gray-100"
+                          : "text-gray-300 hover:text-gray-100"
+                        } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60`}
+                  >
+                    {option}
+                  </motion.button>
+                );
+              })}
 
               {options.length === 0 && (
                 <div className="px-4 py-3 text-sm text-[color:var(--text-muted)] text-center">

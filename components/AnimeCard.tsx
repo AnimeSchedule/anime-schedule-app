@@ -1,26 +1,31 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { AnimeItem } from "../lib/api";
 import { formatSource } from "../lib/format";
 
-export default function AnimeCard({ anime }: { anime: AnimeItem }) {
-  const router = useRouter();
-
+export default function AnimeCard({ anime, onSelect }: { anime: AnimeItem; onSelect: (anime: AnimeItem) => void }) {
   return (
     <>
       <button
         type="button"
-        onClick={() => router.push(`/anime/${anime.id}?from=home`)}
-        className="w-full text-left flex gap-3 sm:gap-4 my-3 sm:my-4 items-start p-3 sm:p-4 rounded-2xl backdrop-blur-md bg-[color:var(--surface-0)] border border-[color:var(--surface-border)] shadow-[0_10px_30px_rgba(5,10,24,0.35)] cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300/35 hover:shadow-[0_20px_36px_rgba(7,14,30,0.48)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60"
+        onClick={() => onSelect(anime)}
+        aria-label={`View details for ${anime.title_english || anime.title}`}
+        className="w-full text-left flex gap-3 sm:gap-4 my-3 sm:my-4 items-start p-3 sm:p-4 rounded-2xl bg-[color:var(--surface-0)] border border-[color:var(--surface-border)] shadow-[0_10px_30px_rgba(5,10,24,0.35)] cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:border-orange-300/35 hover:shadow-[0_20px_36px_rgba(7,14,30,0.48)] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/60"
       >
         {/* Poster */}
         <div className="relative w-24 sm:w-32 md:w-36 lg:w-44 aspect-2/3 rounded-xl overflow-hidden shrink-0 border border-gray-700/50">
           {anime.poster_url ? (
-            <img
-              src={anime.poster_url}
-              alt={anime.title}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-            />
+            <>
+              <img
+                src={anime.poster_url}
+                alt={anime.title}
+                loading="lazy"
+                onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.parentElement!.querySelector('.poster-fallback')?.classList.remove('hidden'); }}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+              />
+              <div className="poster-fallback hidden absolute inset-0 flex items-center justify-center text-gray-500 font-semibold tracking-wide">
+                NO POSTER
+              </div>
+            </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-500 font-semibold tracking-wide">
               NO POSTER
@@ -105,16 +110,6 @@ export default function AnimeCard({ anime }: { anime: AnimeItem }) {
               </div>
             )}
           </div>
-
-          <a
-            href={anime.url}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="mt-3 sm:mt-4 self-start px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm font-medium text-orange-100 bg-orange-400/12 border border-orange-300/25 rounded-md hover:bg-orange-300/20 transition-colors"
-          >
-            View on MAL
-          </a>
         </div>
       </button>
     </>

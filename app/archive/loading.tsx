@@ -6,21 +6,33 @@ export default function ArchiveLoading() {
       <div className="w-full max-w-7xl">
         <ArchiveHeader />
 
-        <div className="rounded-2xl border border-[color:var(--surface-border)] bg-[color:var(--surface-0)] p-6 sm:p-8 shadow-[0_18px_34px_rgba(6,12,24,0.4)]">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 border-4 border-orange-300 border-t-transparent rounded-full animate-spin" />
-            <p className="text-gray-200 font-medium">Loading archive...</p>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {Array.from({ length: 12 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="aspect-2/3 rounded-lg bg-slate-800/70 border border-slate-600/45 animate-pulse"
-              />
-            ))}
+        {/* Controls skeleton */}
+        <div className="mb-8 surface-panel rounded-2xl p-4 sm:p-5 space-y-4">
+          <div className="h-12 rounded-xl bg-slate-800/70 animate-pulse" />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="h-11 w-full sm:w-48 rounded-xl bg-slate-800/70 animate-pulse" />
+            <div className="h-11 w-full sm:w-48 rounded-xl bg-slate-800/70 animate-pulse" />
           </div>
         </div>
+
+        {/* Month group skeletons */}
+        {[1, 2].map((i) => (
+          <div key={i} className="mb-10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-7 w-40 rounded-lg bg-slate-800/70 animate-pulse" />
+              <div className="h-5 w-8 rounded-full bg-slate-800/70 animate-pulse" />
+              <div className="flex-1 h-px bg-slate-800/50" />
+            </div>
+            <div className="flex gap-4 overflow-hidden">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="shrink-0 w-40 sm:w-44 md:w-48 lg:w-56 aspect-2/3 rounded-xl bg-slate-800/70 border border-slate-600/45 animate-pulse"
+                />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

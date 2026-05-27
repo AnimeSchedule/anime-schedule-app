@@ -1,4 +1,5 @@
 export function formatSource(source: string): string {
+  if (!source) return "Unknown";
   return source
     .replace(/_/g, " ")
     .split(" ")
